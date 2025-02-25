@@ -1,0 +1,2 @@
+scrapfly-sdk>=1.0.0
+jmespath>=1.0.0
