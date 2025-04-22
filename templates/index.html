@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tweet Scraper</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tweet Scraper</h1>
+    <button onclick="startScraping()">Start Scraping</button>
+    <div>
+        <h2>Process Tweet</h2>
+        <textarea id="tweetText" rows="4" cols="50" placeholder="Enter tweet text here..."></textarea>
+        <br>
+        <button onclick="processTweet()">Process Tweet</button>
+    </div>
+    <div id="result"></div>
+
+    <script>
+        function startScraping() {
+            fetch('/scrape', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').innerText = data.message;
+            })
+            .catch(error => {
+                document.getElementById('result').innerText = 'Error: ' + error;
+            });
+        }
+
+        function processTweet() {
+            const tweetText = document.getElementById('tweetText').value;
+            fetch('/process_tweet', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({tweet_text: tweetText})
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').innerText = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                document.getElementById('result').innerText = 'Error: ' + error;
+            });
+        }
+    </script>
+</body>
+</html>

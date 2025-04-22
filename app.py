@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 import os
 import dotenv
+import asyncio
 import tweet_scraper
 import text_seperator
 
@@ -15,15 +16,9 @@ def home():
 @app.route('/scrape', methods=['POST'])
 def scrape():
     try:
-        data = request.get_json()
-        username = data.get('username')
-        password = data.get('password')
-        tweet_count = data.get('tweet_count', 5)
-        outdir = data.get('outdir', './downloaded_media')
         
-        asyncio.run(tweet_scraper.scrape(username, password, tweet_count, outdir))
-        
-        return jsonify({"message": "Scraping completed successfully!"}), 200
+        asyncio.run(tweet_scraper.scrape())
+        return jsonify({"message": "Scraping completed successfully!", "data": "Check tweets.json for results"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -32,7 +27,13 @@ def process_tweet():
     try:
         data = request.get_json()
         tweet_text = data.get('tweet_text')
-        bluesky_thread = text_seperator.process_tweet(tweet_text)
-        return jsonify({"bluesky_thread": bluesky_thread}), 200
+        if not tweet_text:
+            return jsonify({"error": "Tweet text is required"}), 400
+            
+        processed_result = text_seperator.process_text_for_bluesky(tweet_text)
+        return jsonify(processed_result), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True)
